@@ -16,8 +16,5 @@
     ],
     "license": "GPL v3+",
     "keywords": ["heatmap", "click tracking", "user behavior", "analytics"],
-    "homepage": "https://github.com/yourusername/HeatmapsRW",
-    "support": {
-        "issues": "https://github.com/yourusername/HeatmapsRW/issues"
-    }
+    "homepage": "https://github.com/yourusername/HeatmapsRW"
 }

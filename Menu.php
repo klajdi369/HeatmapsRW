@@ -8,22 +8,19 @@
 
 namespace Piwik\Plugins\HeatmapsRW;
 
-use Piwik\Menu\MenuReporting;
+use Piwik\Menu\MenuAdmin;
 use Piwik\Piwik;
 
 class Menu extends \Piwik\Plugin\Menu
 {
-    public function configureReportingMenu(MenuReporting $menu)
+    public function configureAdminMenu(MenuAdmin $menu)
     {
         $idSite = \Piwik\Common::getRequestVar('idSite', false, 'int');
         
-        if (!empty($idSite) && Piwik::isUserHasViewAccess($idSite)) {
-            $menu->addVisitorsItem(
-                'Heatmaps',
-                array(
-                    'module' => 'HeatmapsRW',
-                    'action' => 'index'
-                ),
+        if (!empty($idSite) && Piwik::isUserHasAdminAccess($idSite)) {
+            $menu->addPlatformItem(
+                'HeatmapsRW_Settings',
+                $this->urlForDefaultAction(),
                 30
             );
         }

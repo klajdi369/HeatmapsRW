@@ -1,0 +1,278 @@
+<!-- Heatmap Widget UI -->
+<div class="heatmapsRW-widget">
+    <h3>{{ 'HeatmapsRW_Heatmaps'|translate }}</h3>
+
+    <div class="heatmap-controls">
+        <div class="form-group">
+            <label for="heatmap-url">Page URL:</label>
+            <input type="text" id="heatmap-url" placeholder="Enter full URL (optional)" class="form-control">
+            <small>Leave empty to see data from all pages</small>
+        </div>
+
+        <div class="form-group">
+            <label for="heatmap-type">Heatmap Type:</label>
+            <select id="heatmap-type" class="form-control">
+                <option value="click">Click Heatmap</option>
+                <option value="scroll">Scroll Heatmap</option>
+                <option value="mousemove">Mouse Movement</option>
+            </select>
+        </div>
+
+        <button class="btn btn-primary" id="generate-heatmap">Generate Heatmap</button>
+        <button class="btn btn-secondary" id="show-urls" style="margin-left: 10px;">Show Pages with Data</button>
+    </div>
+
+    <div id="heatmap-result" style="display: none; margin-top: 20px;">
+        <h4>Heatmap Data</h4>
+        <div id="heatmap-content"></div>
+    </div>
+
+    <div id="urls-result" style="display: none; margin-top: 20px;">
+        <h4>Pages with Heatmap Data</h4>
+        <div id="urls-content"></div>
+    </div>
+
+    <div id="elements-result" style="display: none; margin-top: 20px;">
+        <h4>Top Clicked Elements</h4>
+        <div id="elements-content"></div>
+    </div>
+</div>
+
+<!-- Script -->
+<script>
+$(document).ready(function() {
+    var idSite = {{ idSite }};
+
+    $('#generate-heatmap').click(function() {
+        var url = $('#heatmap-url').val();
+        var type = $('#heatmap-type').val();
+
+        $('#heatmap-result').show();
+        $('#heatmap-content').html('<p>Loading heatmap data...</p>');
+
+        var ajaxRequest = new ajaxHelper();
+        ajaxRequest.setUrl('index.php');
+        ajaxRequest.addParams({
+            module: 'API',
+            method: 'HeatmapsRW.getHeatmapData',
+            idSite: idSite,
+            period: 'day',
+            date: 'today',
+            url: url,
+            eventType: type,
+            format: 'json'
+        }, 'get');
+        ajaxRequest.setCallback(function(data) {
+            displayHeatmapData(data);
+        });
+        ajaxRequest.setErrorCallback(function(xhr, textStatus, errorThrown) {
+            $('#heatmap-content').html('<p style="color: red;">Error loading heatmap data: ' + textStatus + '</p>');
+        });
+        ajaxRequest.send();
+
+        if (type === 'click') {
+            $('#elements-result').show();
+            $('#elements-content').html('<p>Loading top elements...</p>');
+
+            var elementsRequest = new ajaxHelper();
+            elementsRequest.setUrl('index.php');
+            elementsRequest.addParams({
+                module: 'API',
+                method: 'HeatmapsRW.getTopClickedElements',
+                idSite: idSite,
+                period: 'day',
+                date: 'today',
+                url: url,
+                format: 'json'
+            }, 'get');
+            elementsRequest.setCallback(function(data) {
+                displayTopElements(data);
+            });
+            elementsRequest.send();
+        } else {
+            $('#elements-result').hide();
+        }
+    });
+
+    $('#show-urls').click(function() {
+        $('#urls-result').show();
+        $('#urls-content').html('<p>Loading pages...</p>');
+
+        var urlsRequest = new ajaxHelper();
+        urlsRequest.setUrl('index.php');
+        urlsRequest.addParams({
+            module: 'API',
+            method: 'HeatmapsRW.getUrlsWithHeatmapData',
+            idSite: idSite,
+            period: 'day',
+            date: 'today',
+            format: 'json'
+        }, 'get');
+        urlsRequest.setCallback(function(data) {
+            displayUrlsWithData(data);
+        });
+        urlsRequest.send();
+    });
+
+    function displayHeatmapData(data) {
+        let html = '<div class="heatmap-data">';
+        try {
+            if (!data || data.length === 0) {
+                html += `<p>No heatmap data found. Make sure the tracking code is working on your website.</p>`;
+            } else {
+                html += `<p><strong>Found ${data.length} viewport size(s) with heatmap data:</strong></p>`;
+
+                data.forEach(viewport => {
+                    const sortedPoints = viewport.points.sort((a, b) => b.value - a.value).slice(0, 10);
+                    html += `
+                        <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd;">
+                            <h5>Viewport: ${viewport.viewport.width}x${viewport.viewport.height}px</h5>
+                            <p>Data points: ${viewport.points.length}</p>
+                            <table style="width: 100%; font-size: 12px;">
+                                <thead>
+                                    <tr><th>X</th><th>Y</th><th>Clicks</th></tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    sortedPoints.forEach(point => {
+                        html += `
+                            <tr>
+                                <td>${point.x}px</td>
+                                <td>${point.y}px</td>
+                                <td>${point.value}</td>
+                            </tr>
+                        `;
+                    });
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+            }
+        } catch (e) {
+            html = `<p style="color: red;">Failed to process heatmap data. Check console for errors.</p>`;
+            console.error(e);
+        }
+
+        html += '</div>';
+        $('#heatmap-content').html(html);
+    }
+
+    function displayTopElements(data) {
+        var html = '<table class="dataTable" style="width: 100%;">';
+        html += '<thead><tr><th>Element</th><th>Text</th><th>Clicks</th></tr></thead>';
+        html += '<tbody>';
+
+        if (data && data.length > 0) {
+            data.forEach(function(item) {
+                html += '<tr>';
+                html += '<td><code>' + (item.element_selector || '') + '</code></td>';
+                html += '<td>' + (item.element_text || '') + '</td>';
+                html += '<td>' + (item.clicks || 0) + '</td>';
+                html += '</tr>';
+            });
+        } else {
+            html += '<tr><td colspan="3">No click data available</td></tr>';
+        }
+
+        html += '</tbody></table>';
+        $('#elements-content').html(html);
+    }
+
+    function displayUrlsWithData(data) {
+        var html = '<table class="dataTable" style="width: 100%;">';
+        html += '<thead><tr><th>URL</th><th>Total Events</th><th>Clicks</th><th>Scrolls</th></tr></thead>';
+        html += '<tbody>';
+
+        if (data && data.length > 0) {
+            data.forEach(function(item) {
+                html += '<tr>';
+                html += '<td><a href="#" onclick="$(\'#heatmap-url\').val(\'' + item.url + '\'); return false;">' + item.url + '</a></td>';
+                html += '<td>' + (item.events || 0) + '</td>';
+                html += '<td>' + (item.clicks || 0) + '</td>';
+                html += '<td>' + (item.scrolls || 0) + '</td>';
+                html += '</tr>';
+            });
+        } else {
+            html += '<tr><td colspan="4">No pages with heatmap data found</td></tr>';
+        }
+
+        html += '</tbody></table>';
+        $('#urls-content').html(html);
+    }
+});
+</script>
+
+<!-- Styles -->
+<style>
+.heatmapsRW-widget {
+    padding: 15px;
+}
+
+.heatmap-controls .form-group {
+    margin-bottom: 15px;
+}
+
+.heatmap-controls label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.heatmap-controls .form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.heatmap-controls .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #007cba;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.dataTable th,
+.dataTable td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.dataTable th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+code {
+    background: #f5f5f5;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 11px;
+}
+</style>
