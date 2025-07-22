@@ -1,0 +1,234 @@
+/* HeatmapsRW Styles */
+.heatmapsRW {
+    .card {
+        margin-top: 20px;
+        background: @theme-color-background-base;
+        border: 1px solid @theme-color-background-contrast;
+        border-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .card-content {
+        padding: 20px;
+    }
+    
+    .card-title {
+        font-size: 18px;
+        font-weight: 400;
+        margin-bottom: 20px;
+        color: @theme-color-text;
+    }
+    
+    .card-action {
+        padding: 10px 20px;
+        border-top: 1px solid @theme-color-background-contrast;
+        
+        a {
+            margin-right: 20px;
+            color: @theme-color-link;
+            text-decoration: none;
+            
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+    
+    #heatmap-viewer-frame {
+        border: 1px solid @theme-color-background-contrast;
+        background: #fff;
+        margin-top: 15px;
+        position: relative;
+    }
+    
+    .input-field {
+        margin-bottom: 20px;
+        
+        label {
+            color: @theme-color-text-lighter;
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid @theme-color-background-contrast;
+            border-radius: 4px;
+            font-size: 14px;
+            
+            &:focus {
+                outline: none;
+                border-color: @theme-color-brand;
+            }
+        }
+    }
+    
+    select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid @theme-color-background-contrast;
+        border-radius: 4px;
+        background: @theme-color-background-base;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
+    .btn {
+        background: @theme-color-brand;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        
+        &:hover {
+            background: darken(@theme-color-brand, 10%);
+        }
+        
+        i {
+            margin-left: 8px;
+        }
+    }
+    
+    code {
+        background: @theme-color-background-contrast;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 13px;
+    }
+    
+    .dataTable {
+        width: 100%;
+        border-collapse: collapse;
+        
+        th {
+            background: @theme-color-background-contrast;
+            padding: 10px;
+            text-align: left;
+            font-weight: 500;
+            border-bottom: 2px solid @theme-color-background-contrast;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid @theme-color-background-contrast;
+        }
+        
+        tbody tr:hover {
+            background: @theme-color-background-contrast;
+        }
+    }
+}
+
+/* Heatmap Canvas */
+.heatmap-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Click Overlay */
+.heatmap-click-overlay {
+    position: absolute;
+    border: 2px solid #ff5722;
+    background: rgba(255, 87, 34, 0.1);
+    pointer-events: none;
+    z-index: 10000;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background: rgba(255, 87, 34, 0.2);
+    }
+    
+    .click-count {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        background: #ff5722;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+}
+
+/* Heatmap Legend */
+.heatmap-legend {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: @theme-color-background-base;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 10001;
+    
+    h4 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .gradient-bar {
+        width: 200px;
+        height: 20px;
+        background: linear-gradient(to right, blue, cyan, green, yellow, orange, red);
+        border-radius: 3px;
+        margin-bottom: 5px;
+    }
+    
+    .labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: @theme-color-text-lighter;
+    }
+}
+
+/* Responsive */
+@media only screen and (max-width: 749px) {
+    .heatmapsRW {
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        .col {
+            padding: 0;
+            width: 100% !important;
+        }
+        
+        .input-field {
+            margin-bottom: 15px;
+        }
+        
+        select {
+            margin-bottom: 15px;
+        }
+    }
+    
+    .heatmap-legend {
+        bottom: 10px;
+        right: 10px;
+        padding: 10px;
+        
+        .gradient-bar {
+            width: 150px;
+            height: 15px;
+        }
+    }
+}

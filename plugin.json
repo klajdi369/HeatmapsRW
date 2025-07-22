@@ -1,0 +1,23 @@
+{
+    "name": "HeatmapsRW",
+    "description": "Track user interactions and generate heatmaps for your website",
+    "version": "1.0.0",
+    "theme": false,
+    "require": {
+        "matomo": ">=5.0.0,<6.0.0",
+        "php": ">=7.2.5"
+    },
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "your.email@example.com",
+            "homepage": "https://example.com"
+        }
+    ],
+    "license": "GPL v3+",
+    "keywords": ["heatmap", "click tracking", "user behavior", "analytics"],
+    "homepage": "https://github.com/yourusername/HeatmapsRW",
+    "support": {
+        "issues": "https://github.com/yourusername/HeatmapsRW/issues"
+    }
+}

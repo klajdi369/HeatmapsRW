@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heatmap Viewer</title>
+    <script src="plugins/HeatmapsRW/javascripts/heatmap-viewer.js"></script>
+    <link rel="stylesheet" href="plugins/HeatmapsRW/stylesheets/heatmap.css">
+</head>
+<body>
+    <div id="heatmap-container"></div>
+    <script>
+        HeatmapsRWViewer.init('heatmap-container');
+        HeatmapsRWViewer.loadData('{{ url|e('js') }}', '{{ period|e('js') }}', '{{ date|e('js') }}');
+    </script>
+</body>
+</html>

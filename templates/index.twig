@@ -1,0 +1,197 @@
+{% extends 'dashboard.twig' %}
+
+{% set title %}{{ 'HeatmapsRW_Heatmaps'|translate }}{% endset %}
+
+{% block content %}
+<div class="heatmapsRW">
+    <h2>{{ 'HeatmapsRW_Heatmaps'|translate }}</h2>
+    
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">{{ 'HeatmapsRW_SelectPage'|translate }}</span>
+                    
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="text" id="heatmap-url" placeholder="{{ 'HeatmapsRW_EnterURL'|translate }}" class="browser-default">
+                            <label for="heatmap-url" class="active">{{ 'HeatmapsRW_PageURL'|translate }}</label>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col s12 m4">
+                            <label>{{ 'General_Period'|translate }}</label>
+                            <select id="heatmap-period" class="browser-default">
+                                <option value="day">{{ 'General_Daily'|translate }}</option>
+                                <option value="week">{{ 'General_Weekly'|translate }}</option>
+                                <option value="month">{{ 'General_Monthly'|translate }}</option>
+                                <option value="year">{{ 'General_Yearly'|translate }}</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col s12 m4">
+                            <label>{{ 'General_Date'|translate }}</label>
+                            <input type="text" id="heatmap-date" class="browser-default" value="{{ 'today' }}">
+                        </div>
+                        
+                        <div class="col s12 m4">
+                            <label>{{ 'HeatmapsRW_Type'|translate }}</label>
+                            <select id="heatmap-type" class="browser-default">
+                                <option value="click">{{ 'HeatmapsRW_Clicks'|translate }}</option>
+                                <option value="mousemove">{{ 'HeatmapsRW_MouseMovements'|translate }}</option>
+                                <option value="scroll">{{ 'HeatmapsRW_ScrollMap'|translate }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col s12">
+                            <button class="btn waves-effect waves-light" id="generate-heatmap">
+                                {{ 'HeatmapsRW_GenerateHeatmap'|translate }}
+                                <i class="icon-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row" id="heatmap-container" style="display: none;">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">{{ 'HeatmapsRW_HeatmapVisualization'|translate }}</span>
+                    <div id="heatmap-viewer-frame" style="position: relative; width: 100%; height: 600px; overflow: auto;">
+                        <iframe id="heatmap-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <a href="#" id="toggle-clickmap">{{ 'HeatmapsRW_ShowClickNumbers'|translate }}</a>
+                    <a href="#" id="download-heatmap">{{ 'HeatmapsRW_Download'|translate }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">{{ 'HeatmapsRW_TopClickedElements'|translate }}</span>
+                    <div id="top-elements-table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Initialize date picker
+    if (piwik && piwik.initDatePicker) {
+        piwik.initDatePicker('#heatmap-date', 'yy-mm-dd', {
+            onSelect: function() {}
+        });
+    }
+    
+    $('#generate-heatmap').click(function() {
+        var url = $('#heatmap-url').val();
+        var period = $('#heatmap-period').val();
+        var date = $('#heatmap-date').val();
+        var type = $('#heatmap-type').val();
+        
+        if (!url) {
+            var notification = new Notification();
+            notification.show('{{ 'HeatmapsRW_PleaseEnterURL'|translate|e('js') }}', {
+                placeat: '#notificationContainer',
+                context: 'error',
+                id: 'HeatmapsRW_error'
+            });
+            return;
+        }
+        
+        // Show container
+        $('#heatmap-container').show();
+        
+        // Load page in iframe
+        $('#heatmap-iframe').attr('src', url);
+        
+        // Wait for iframe to load then inject heatmap
+        $('#heatmap-iframe').off('load').on('load', function() {
+            var iframe = this;
+            var iframeWindow = iframe.contentWindow;
+            
+            // Inject heatmap viewer
+            setTimeout(function() {
+                if (iframeWindow && iframeWindow.document) {
+                    // Load heatmap data
+                    loadHeatmapInIframe(iframeWindow, url, period, date, type);
+                }
+            }, 1000);
+        });
+        
+        // Load top clicked elements
+        loadTopElements(url, period, date);
+    });
+    
+    function loadHeatmapInIframe(iframeWindow, url, period, date, type) {
+        // This would normally inject the heatmap viewer into the iframe
+        // For now, we'll just log that it would happen
+        console.log('Would load heatmap for:', url, period, date, type);
+    }
+    
+    function loadTopElements(url, period, date) {
+        var ajaxRequest = new ajaxHelper();
+        ajaxRequest.setUrl('index.php');
+        ajaxRequest.addParams({
+            module: 'API',
+            method: 'HeatmapsRW.getTopClickedElements',
+            idSite: piwik.idSite || {{ idSite }},
+            period: period,
+            date: date,
+            url: url,
+            format: 'json'
+        }, 'get');
+        ajaxRequest.setCallback(function(data) {
+            renderTopElementsTable(data);
+        });
+        ajaxRequest.send();
+    }
+    
+    function renderTopElementsTable(data) {
+        var html = '<table class="dataTable"><thead><tr>';
+        html += '<th>{{ 'HeatmapsRW_Element'|translate|e('js') }}</th>';
+        html += '<th>{{ 'HeatmapsRW_ElementText'|translate|e('js') }}</th>';
+        html += '<th>{{ 'HeatmapsRW_Clicks'|translate|e('js') }}</th>';
+        html += '</tr></thead><tbody>';
+        
+        if (data && data.length > 0) {
+            data.forEach(function(item) {
+                html += '<tr>';
+                html += '<td><code>' + piwik.helper.escape(item.element_selector || '') + '</code></td>';
+                html += '<td>' + piwik.helper.escape(item.element_text || '') + '</td>';
+                html += '<td>' + (item.clicks || 0) + '</td>';
+                html += '</tr>';
+            });
+        } else {
+            html += '<tr><td colspan="3">{{ 'General_NoDataForGraph'|translate|e('js') }}</td></tr>';
+        }
+        
+        html += '</tbody></table>';
+        $('#top-elements-table').html(html);
+    }
+    
+    $('#toggle-clickmap').click(function(e) {
+        e.preventDefault();
+        // Toggle click map functionality
+    });
+    
+    $('#download-heatmap').click(function(e) {
+        e.preventDefault();
+        // Download heatmap functionality
+    });
+});
+</script>
+{% endblock %}

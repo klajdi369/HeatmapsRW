@@ -1,0 +1,30 @@
+{
+    "HeatmapsRW": {
+        "Heatmaps": "Heatmaps",
+        "SelectPage": "Select Page to Analyze",
+        "EnterURL": "Enter the full URL of the page you want to analyze",
+        "PageURL": "Page URL",
+        "Type": "Heatmap Type",
+        "Clicks": "Click Heatmap",
+        "MouseMovements": "Mouse Movement Heatmap",
+        "ScrollMap": "Scroll Heatmap",
+        "GenerateHeatmap": "Generate Heatmap",
+        "HeatmapVisualization": "Heatmap Visualization",
+        "ShowClickNumbers": "Show Click Numbers",
+        "Download": "Download Heatmap",
+        "TopClickedElements": "Top Clicked Elements",
+        "Element": "Element",
+        "ElementText": "Text",
+        "PleaseEnterURL": "Please enter a URL to analyze",
+        "NoDataAvailable": "No heatmap data available for this page",
+        "LoadingHeatmap": "Loading heatmap data...",
+        "HeatmapGenerated": "Heatmap generated successfully",
+        "UrlsWithData": "Pages with Heatmap Data",
+        "Visits": "Visits",
+        "Events": "Events",
+        "ViewHeatmap": "View Heatmap",
+        "Settings": "Heatmap Settings",
+        "EnableTracking": "Enable heatmap tracking",
+        "TrackingInfo": "When enabled, user interactions will be tracked for heatmap generation"
+    }
+}
